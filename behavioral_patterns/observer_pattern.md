@@ -29,58 +29,70 @@ Observer <|-- ConcreteObserverB
   }
 ```
 
-## implemetation in python:
+## Python implementation:
+
 ```python
-class Subject:
+class WeatherStation:
     def __init__(self):
         self._observers = set()
-        self._state = None
+        self._temperature = None
 
     def attach(self, observer):
-        observer._subject = self
         self._observers.add(observer)
 
     def detach(self, observer):
-        observer._subject = None
         self._observers.remove(observer)
 
     def notify(self):
         for observer in self._observers:
-            observer.update()
+            observer.update(self)
 
     @property
-    def state(self):
-        return self._state
+    def temperature(self):
+        return self._temperature
 
-    @state.setter
-    def state(self, state):
-        self._state = state
-        self.notify()
+    @temperature.setter
+    def temperature(self, temp):
+        self._temperature = temp
+        self.notify()  # Notify all observers when temperature changes
 
-class Observer:
-    def update(self):
+class WeatherObserver:
+    def update(self, subject):
         raise NotImplementedError
 
-class ConcreteObserverA(Observer):
-    def update(self):
-        print("ConcreteObserverA received the update.")
+# Concrete Observers for different display devices
+class MobileAppDisplay(WeatherObserver):
+    def update(self, subject):
+        print(f"MobileAppDisplay: New temperature is {subject.temperature}°C")
 
-class ConcreteObserverB(Observer):
-    def update(self):
-        print("ConcreteObserverB received the update.")
+class DesktopDashboard(WeatherObserver):
+    def update(self, subject):
+        print(f"DesktopDashboard: New temperature is {subject.temperature}°C")
 
-subject = Subject()
-observer_a = ConcreteObserverA()
-observer_b = ConcreteObserverB()
+class OutdoorDisplay(WeatherObserver):
+    def update(self, subject):
+        print(f"OutdoorDisplay: New temperature is {subject.temperature}°C")
 
-subject.attach(observer_a)
-subject.attach(observer_b)
+# Client code: Creating the WeatherStation (Subject) and different displays (Observers)
+weather_station = WeatherStation()
 
-subject.state = 123
+mobile_display = MobileAppDisplay()
+desktop_display = DesktopDashboard()
+outdoor_display = OutdoorDisplay()
 
-subject.detach(observer_a)
+# Attaching observers
+weather_station.attach(mobile_display)
+weather_station.attach(desktop_display)
+weather_station.attach(outdoor_display)
 
-subject.state = "Hello, world!"
+# Simulate temperature changes
+weather_station.temperature = 25  # Notifies all observers with the new temperature
+weather_station.temperature = 30  # Notifies all observers again
+
+# Detach one observer and update state
+weather_station.detach(outdoor_display)
+weather_station.temperature = 20  # Only MobileAppDisplay and DesktopDashboard get the update
+
 
 ```
 # JavaScrip implementation:
